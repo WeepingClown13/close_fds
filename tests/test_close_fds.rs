@@ -55,15 +55,14 @@ fn run_basic_test(
     ),
     builder: close_fds::CloseFdsBuilder,
 ) {
-    let f1 = std::fs::File::open("/").unwrap();
-    let f2 = std::fs::File::open("/").unwrap();
-    let f3 = std::fs::File::open("/").unwrap();
 
-    let fd1 = f1.as_raw_fd();
-    let fd2 = f2.as_raw_fd();
-    let fd3 = f3.as_raw_fd();
+    let path = std::ffi::CString::new("/").unwrap();
 
-    drop(f3);
+    let fd1 = unsafe { libc::open(path.as_ptr(), libc::O_RDONLY) };
+    let fd2 = unsafe { libc::open(path.as_ptr(), libc::O_RDONLY) };
+    let fd3 = unsafe { libc::open(path.as_ptr(), libc::O_RDONLY) };
+
+    unsafe { libc::close(fd3) };
 
     assert!(is_fd_open(fd1));
     assert!(is_fd_open(fd2));
